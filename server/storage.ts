@@ -1,4 +1,6 @@
 import { articles, type Article, type InsertArticle, type UpdateArticle } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Articles
@@ -145,4 +147,46 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getArticles(): Promise<Article[]> {
+    return await db.select().from(articles).orderBy(desc(articles.createdAt));
+  }
+
+  async getArticleById(id: number): Promise<Article | undefined> {
+    const [article] = await db.select().from(articles).where(eq(articles.id, id));
+    return article || undefined;
+  }
+
+  async getArticleBySlug(slug: string): Promise<Article | undefined> {
+    const [article] = await db.select().from(articles).where(eq(articles.slug, slug));
+    return article || undefined;
+  }
+
+  async createArticle(insertArticle: InsertArticle): Promise<Article> {
+    const [article] = await db
+      .insert(articles)
+      .values(insertArticle)
+      .returning();
+    return article;
+  }
+
+  async updateArticle(id: number, updateArticle: UpdateArticle): Promise<Article | undefined> {
+    const [article] = await db
+      .update(articles)
+      .set(updateArticle)
+      .where(eq(articles.id, id))
+      .returning();
+    return article || undefined;
+  }
+
+  async deleteArticle(id: number): Promise<boolean> {
+    const result = await db.delete(articles).where(eq(articles.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getPublishedArticles(): Promise<Article[]> {
+    return await db.select().from(articles).where(eq(articles.published, true)).orderBy(desc(articles.createdAt));
+  }
+}
+
+export const storage = new DatabaseStorage();

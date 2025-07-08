@@ -59,8 +59,8 @@ This is a full-stack news website built with React frontend and Express backend.
 4. Admin dashboard accessible only to authenticated users
 
 ### Storage Strategy
-- **Development**: In-memory storage for rapid prototyping
-- **Production**: PostgreSQL database with Drizzle ORM
+- **Database**: PostgreSQL database with Drizzle ORM (fully integrated)
+- **Articles**: Stored in PostgreSQL with full CRUD operations
 - **Images**: Firebase Storage for article images
 - **Sessions**: PostgreSQL-backed session storage
 
@@ -128,3 +128,4 @@ Preferred communication style: Simple, everyday language.
 
 Changelog:
 - July 08, 2025. Initial setup
+- July 08, 2025. Database integration completed - PostgreSQL database fully configured with Drizzle ORM, replaced memory storage with DatabaseStorage, sample articles migrated to database
