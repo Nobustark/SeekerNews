@@ -225,7 +225,7 @@ export default function ArticleForm() {
                 <Label htmlFor="image" className="text-sm font-semibold text-gray-700">
                   Article Image
                 </Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-500 transition-colors">
                   <input
                     type="file"
                     id="image"
@@ -315,7 +315,7 @@ export default function ArticleForm() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                  className="bg-red-600 hover:bg-red-700 text-white font-semibold"
                   disabled={createArticleMutation.isPending || updateArticleMutation.isPending}
                 >
                   {createArticleMutation.isPending || updateArticleMutation.isPending ? (

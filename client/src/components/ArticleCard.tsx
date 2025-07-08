@@ -30,11 +30,11 @@ export default function ArticleCard({ article }: ArticleCardProps) {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "Tech": return "bg-blue-600";
-      case "Health": return "bg-green-600";
-      case "Sports": return "bg-orange-600";
-      case "Business": return "bg-purple-600";
-      case "Environment": return "bg-emerald-600";
+      case "Tech": return "bg-red-600";
+      case "Health": return "bg-red-500";
+      case "Sports": return "bg-red-700";
+      case "Business": return "bg-red-800";
+      case "Environment": return "bg-red-500";
       default: return "bg-red-600";
     }
   };
@@ -71,7 +71,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
           {article.excerpt || `${article.content.substring(0, 150)}...`}
         </p>
         <Link href={`/article/${article.slug}`}>
-          <span className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-colors cursor-pointer">
+          <span className="inline-flex items-center text-red-600 hover:text-red-800 font-semibold transition-colors cursor-pointer">
             Read More <ArrowRight className="w-4 h-4 ml-2" />
           </span>
         </Link>

@@ -90,7 +90,7 @@ export default function AdminDashboard() {
               <Button
                 onClick={handleLogout}
                 variant="destructive"
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 border-red-600"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800">Manage Articles</h2>
           <Link href="/admin/articles/new">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+            <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold">
               <Plus className="w-4 h-4 mr-2" />
               Create New Article
             </Button>
