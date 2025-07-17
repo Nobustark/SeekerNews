@@ -11,7 +11,7 @@ import { onAuthStateChange } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { X, CloudUpload, Trash2, Send } from "lucide-react";
+import { X, CloudUpload, Trash2, Send, Sparkles, Brain, Tags } from "lucide-react";
 import type { Article } from "@shared/schema";
 
 export default function ArticleForm() {
@@ -32,6 +32,7 @@ export default function ArticleForm() {
   const [excerpt, setExcerpt] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [published, setPublished] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChange((user) => {
@@ -157,6 +158,54 @@ export default function ArticleForm() {
     }
   };
 
+  const handleGenerateTitle = async () => {
+    if (!content) return;
+    setIsGenerating(true);
+    try {
+      const response = await apiRequest("/api/admin/ai/generate-title", {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      });
+      setTitle(response.title);
+      toast({
+        title: "Success",
+        description: "AI title generated successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate title. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateSummary = async () => {
+    if (!content) return;
+    setIsGenerating(true);
+    try {
+      const response = await apiRequest("/api/admin/ai/generate-summary", {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      });
+      setExcerpt(response.summary);
+      toast({
+        title: "Success",
+        description: "AI summary generated successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate summary. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   if (loading || (isEdit && articleLoading)) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -195,9 +244,22 @@ export default function ArticleForm() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
-                    Article Title *
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
+                      Article Title *
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGenerateTitle}
+                      disabled={!content || isGenerating}
+                      className="text-red-600 border-red-600 hover:bg-red-50"
+                    >
+                      <Brain className="w-4 h-4 mr-1" />
+                      {isGenerating ? "Generating..." : "AI Title"}
+                    </Button>
+                  </div>
                   <Input
                     id="title"
                     value={title}
@@ -264,9 +326,22 @@ export default function ArticleForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="excerpt" className="text-sm font-semibold text-gray-700">
-                  Article Excerpt
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="excerpt" className="text-sm font-semibold text-gray-700">
+                    Article Excerpt
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateSummary}
+                    disabled={!content || isGenerating}
+                    className="text-red-600 border-red-600 hover:bg-red-50"
+                  >
+                    <Sparkles className="w-4 h-4 mr-1" />
+                    {isGenerating ? "Generating..." : "AI Summary"}
+                  </Button>
+                </div>
                 <Textarea
                   id="excerpt"
                   value={excerpt}

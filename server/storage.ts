@@ -1,4 +1,4 @@
-import { articles, type Article, type InsertArticle, type UpdateArticle } from "@shared/schema";
+import { articles, admins, type Article, type InsertArticle, type UpdateArticle, type Admin, type InsertAdmin } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -11,6 +11,11 @@ export interface IStorage {
   updateArticle(id: number, article: UpdateArticle): Promise<Article | undefined>;
   deleteArticle(id: number): Promise<boolean>;
   getPublishedArticles(): Promise<Article[]>;
+  
+  // Admins
+  getAdminById(id: number): Promise<Admin | undefined>;
+  getAdminByEmail(email: string): Promise<Admin | undefined>;
+  createAdmin(admin: InsertAdmin): Promise<Admin>;
 }
 
 export class MemStorage implements IStorage {
@@ -145,6 +150,18 @@ export class MemStorage implements IStorage {
       .filter(article => article.published)
       .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
   }
+
+  getAdminById(id: number): Promise<Admin | undefined> {
+    return Promise.resolve(undefined);
+  }
+
+  getAdminByEmail(email: string): Promise<Admin | undefined> {
+    return Promise.resolve(undefined);
+  }
+
+  createAdmin(admin: InsertAdmin): Promise<Admin> {
+    return Promise.resolve({} as Admin);
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -186,6 +203,24 @@ export class DatabaseStorage implements IStorage {
 
   async getPublishedArticles(): Promise<Article[]> {
     return await db.select().from(articles).where(eq(articles.published, true)).orderBy(desc(articles.createdAt));
+  }
+
+  async getAdminById(id: number): Promise<Admin | undefined> {
+    const [admin] = await db.select().from(admins).where(eq(admins.id, id));
+    return admin || undefined;
+  }
+
+  async getAdminByEmail(email: string): Promise<Admin | undefined> {
+    const [admin] = await db.select().from(admins).where(eq(admins.email, email));
+    return admin || undefined;
+  }
+
+  async createAdmin(insertAdmin: InsertAdmin): Promise<Admin> {
+    const [admin] = await db
+      .insert(admins)
+      .values(insertAdmin)
+      .returning();
+    return admin;
   }
 }
 

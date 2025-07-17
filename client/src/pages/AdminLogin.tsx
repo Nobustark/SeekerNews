@@ -4,49 +4,64 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { loginWithEmail, onAuthStateChange } from "@/lib/auth";
+import { Shield, UserPlus, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, LogIn } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((user) => {
-      if (user) {
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      try {
+        await apiRequest("/api/auth/me");
         setLocation("/admin/dashboard");
+      } catch (error) {
+        // User not authenticated, stay on login page
       }
-    });
-
-    return unsubscribe;
+    };
+    checkAuth();
   }, [setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
-    const { user, error } = await loginWithEmail(email, password);
-
-    if (error) {
-      setError(error);
+    try {
+      if (isRegistering) {
+        await apiRequest("/api/auth/register", {
+          method: "POST",
+          body: JSON.stringify({ email, password, name }),
+        });
+        toast({
+          title: "Registration Successful",
+          description: "Welcome! You can now access the admin dashboard.",
+        });
+      } else {
+        await apiRequest("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email, password }),
+        });
+        toast({
+          title: "Login Successful",
+          description: "Welcome back to the admin dashboard!",
+        });
+      }
+      setLocation("/admin/dashboard");
+    } catch (error: any) {
+      console.error("Auth error:", error);
       toast({
-        title: "Login Failed",
-        description: error,
+        title: isRegistering ? "Registration Failed" : "Login Failed",
+        description: "Please check your credentials and try again.",
         variant: "destructive",
       });
-    } else if (user) {
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to the admin dashboard!",
-      });
-      setLocation("/admin/dashboard");
     }
 
     setLoading(false);
@@ -62,15 +77,30 @@ export default function AdminLogin() {
                 <Shield className="w-8 h-8" />
               </div>
             </div>
-            <CardTitle className="text-3xl font-bold text-gray-800">Admin Login</CardTitle>
-            <p className="text-gray-600">Access RedNews admin dashboard</p>
+            <CardTitle className="text-3xl font-bold text-gray-800">
+              {isRegistering ? "Create Admin Account" : "Admin Login"}
+            </CardTitle>
+            <p className="text-gray-600">
+              {isRegistering ? "Register for RedNews admin access" : "Access RedNews admin dashboard"}
+            </p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+              {isRegistering && (
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-semibold text-gray-700">
+                    Full Name
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                    required
+                  />
+                </div>
               )}
               
               <div className="space-y-2">
@@ -82,8 +112,8 @@ export default function AdminLogin() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@newshub.com"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="admin@example.com"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
                   required
                 />
               </div>
@@ -98,7 +128,7 @@ export default function AdminLogin() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
                   required
                 />
               </div>
@@ -109,7 +139,12 @@ export default function AdminLogin() {
                 disabled={loading}
               >
                 {loading ? (
-                  "Signing in..."
+                  "Processing..."
+                ) : isRegistering ? (
+                  <>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Create Account
+                  </>
                 ) : (
                   <>
                     <LogIn className="w-4 h-4 mr-2" />
@@ -118,6 +153,21 @@ export default function AdminLogin() {
                 )}
               </Button>
             </form>
+            
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(!isRegistering);
+                  setName("");
+                  setEmail("");
+                  setPassword("");
+                }}
+                className="text-red-600 hover:text-red-800 font-medium transition-colors"
+              >
+                {isRegistering ? "Already have an account? Sign in" : "Need an admin account? Register here"}
+              </button>
+            </div>
           </CardContent>
         </Card>
       </div>
