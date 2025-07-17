@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -50,8 +51,13 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
+
+  console.log(`Checking environment: app.get('env') is "${app.get('env')}"`); // <-- ADD THIS
+
   if (app.get("env") === "development") {
+    console.log("Environment is development, attempting to set up Vite..."); // <-- ADD THIS
     await setupVite(app, server);
+    console.log("Finished setting up Vite."); // <-- ADD THIS
   } else {
     serveStatic(app);
   }
@@ -62,8 +68,7 @@ app.use((req, res, next) => {
   const port = 5000;
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true,
+    host: "127.0.0.1",
   }, () => {
     log(`serving on port ${port}`);
   });
