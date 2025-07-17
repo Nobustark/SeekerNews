@@ -56,9 +56,9 @@ export default function ContactPage() {
                   <h3 className="text-lg font-semibold">Email</h3>
                 </div>
                 <p className="text-gray-600">General inquiries:</p>
-                <p className="text-red-600 font-medium">info@rednews.com</p>
+                <p className="text-red-600 font-medium">info@TheSeeker.com</p>
                 <p className="text-gray-600 mt-2">News tips:</p>
-                <p className="text-red-600 font-medium">tips@rednews.com</p>
+                <p className="text-red-600 font-medium">tips@TheSeeker.com</p>
               </CardContent>
             </Card>
 
@@ -82,7 +82,7 @@ export default function ContactPage() {
                   <h3 className="text-lg font-semibold">Address</h3>
                 </div>
                 <p className="text-gray-600">
-                  RedNews Headquarters<br />
+                  TheSeeker Headquarters<br />
                   123 Media Street<br />
                   News City, NC 12345<br />
                   United States

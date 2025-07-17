@@ -81,7 +81,7 @@ export default function AdminLogin() {
               {isRegistering ? "Create Admin Account" : "Admin Login"}
             </CardTitle>
             <p className="text-gray-600">
-              {isRegistering ? "Register for RedNews admin access" : "Access RedNews admin dashboard"}
+              {isRegistering ? "Register for TheSeeker admin access" : "Access TheSeeker admin dashboard"}
             </p>
           </CardHeader>
           <CardContent className="p-8">

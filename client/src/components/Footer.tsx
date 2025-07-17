@@ -10,7 +10,7 @@ export default function Footer() {
               <div className="bg-red-600 text-white p-2 rounded-lg mr-3">
                 <span className="text-xl font-bold">R</span>
               </div>
-              <h3 className="text-2xl font-bold">RedNews</h3>
+              <h3 className="text-2xl font-bold">TheSeeker</h3>
             </div>
             <p className="text-gray-300 mb-4">
               Your trusted source for breaking news and in-depth analysis. Stay informed with the latest updates from around the world.

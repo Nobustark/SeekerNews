@@ -112,7 +112,7 @@ export default function AdminDashboard() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Shield className="w-8 h-8 text-red-600 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-800">RedNews Admin</h1>
+              <h1 className="text-2xl font-bold text-gray-800">TheSeeker Admin</h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-600">Welcome, {admin.name}</span>

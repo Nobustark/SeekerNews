@@ -16,7 +16,7 @@ export default function AboutPage() {
               <span className="text-2xl font-bold">R</span>
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">About RedNews</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">About TheSeeker</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Your trusted source for breaking news and in-depth analysis. We deliver accurate, 
             timely, and comprehensive coverage of the stories that matter most.
@@ -61,7 +61,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Our Mission</h2>
             <p className="text-gray-600 mb-4">
-              RedNews is dedicated to providing accurate, unbiased, and timely news coverage that keeps 
+              TheSeeker is dedicated to providing accurate, unbiased, and timely news coverage that keeps 
               our readers informed about the world around them. We believe in the power of journalism 
               to educate, inspire, and drive positive change.
             </p>

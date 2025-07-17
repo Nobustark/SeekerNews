@@ -51,8 +51,8 @@ export default function Navigation() {
                     <Flame className="w-6 h-6" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900">RedNews</h1>
-                    <p className="text-xs text-gray-500 -mt-1">Breaking Stories Daily</p>
+                    <h1 className="text-3xl font-bold text-gray-900">TheSeeker</h1>
+                    <p className="text-xs text-gray-500 -mt-1">Seek Expose Empower</p>
                   </div>
                 </div>
               </Link>
