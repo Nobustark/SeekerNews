@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import HomePage from "@/pages/HomePage";
 import ArticlePage from "@/pages/ArticlePage";
+import CategoryPage from "@/pages/CategoryPage";
+import AboutPage from "@/pages/AboutPage";
+import ContactPage from "@/pages/ContactPage";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import ArticleForm from "@/pages/ArticleForm";
@@ -15,6 +18,9 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/article/:slug" component={ArticlePage} />
+      <Route path="/category/:category" component={CategoryPage} />
+      <Route path="/about" component={AboutPage} />
+      <Route path="/contact" component={ContactPage} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/articles/new" component={ArticleForm} />
