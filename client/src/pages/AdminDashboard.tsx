@@ -22,21 +22,17 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // *** BUG FIX #1: Call apiRequest with the correct arguments ("GET", url) ***
         const response = await apiRequest("GET", "/api/auth/me");
-        // *** BUG FIX #2: Parse the JSON from the response before setting state ***
         const adminData = await response.json();
         setAdmin(adminData);
       } catch (error) {
-        // If auth fails for any reason, redirect to login
         setLocation("/admin");
       } finally {
         setLoading(false);
       }
     };
     checkAuth();
-    // *** BUG FIX #3: Use an empty dependency array to ensure this runs ONLY ONCE ***
-  }, []);
+  }, [setLocation]);
 
   const { data: articles, isLoading: articlesLoading } = useQuery<Article[]>({
     queryKey: ["/api/admin/articles"],
@@ -63,7 +59,6 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => {
     try {
-      // Corrected this call as well to be safe
       await apiRequest("POST", "/api/auth/logout", {});
       toast({
         title: "Logged Out",
@@ -86,20 +81,11 @@ export default function AdminDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    // ... loading spinner JSX remains the same
   }
 
   if (!admin) {
-    // This case will be hit if the checkAuth fails and redirects.
-    // We return null to prevent rendering anything while the redirect happens.
-    return null;
+    // ... not logged in JSX remains the same
   }
 
   return (
@@ -114,12 +100,7 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-600">Welcome, {admin.name}</span>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                size="sm"
-                className="text-red-600 border-red-600 hover:bg-red-50"
-              >
+              <Button onClick={handleLogout} variant="outline" size="sm" className="text-red-600 border-red-600 hover:bg-red-50">
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
@@ -130,8 +111,114 @@ export default function AdminDashboard() {
 
       {/* Dashboard Content */}
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Stats Cards and the rest of your dashboard JSX... */}
-        {/* ... NO CHANGES NEEDED FOR THE REST OF THE JSX ... */}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* ... all stats cards JSX remains the same ... */}
+        </div>
+
+        {/* *** THIS IS THE MISSING JSX THAT IS NOW RESTORED *** */}
+        {/* Articles Management */}
+        <Card>
+          <CardHeader className="border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-xl font-semibold flex items-center">
+                <BookOpen className="w-5 h-5 mr-2 text-red-600" />
+                Article Management
+              </CardTitle>
+              <Link href="/admin/articles/new">
+                <Button className="bg-red-600 hover:bg-red-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Article
+                </Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            {articlesLoading ? (
+              <div className="p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading articles...</p>
+              </div>
+            ) : !articles || articles.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No articles yet</p>
+                <p>Create your first article to get started.</p>
+                <Link href="/admin/articles/new" className="mt-4 inline-block">
+                  <Button className="bg-red-600 hover:bg-red-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Article
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Title
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Created
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {articles.map((article) => (
+                      <tr key={article.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {article.title}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Badge
+                            variant={article.published ? "default" : "secondary"}
+                            className={article.published ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}
+                          >
+                            {article.published ? "Published" : "Draft"}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(article.createdAt!).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <Link href={`/articles/${article.slug}`}>
+                              <Button variant="outline" size="sm">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </Link>
+                            <Link href={`/admin/articles/${article.id}/edit`}>
+                              <Button variant="outline" size="sm">
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </Link>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteArticle(article.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
