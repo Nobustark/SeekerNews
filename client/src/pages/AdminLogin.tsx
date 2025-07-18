@@ -1,4 +1,4 @@
-// The complete, corrected code for client/src/pages/adminlogin.ts
+// The COMPLETE AND CORRECTED code for client/src/pages/adminlogin.tsx
 
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -8,21 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, UserPlus, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-// Import our new Firebase auth functions
-import { registerWithFirebase, loginWithFirebase, onFirebaseAuthStateChange } from "@/components/auth";
+import { registerWithFirebase, loginWithFirebase } from "@/components/auth"; // We only need these now
 import { apiRequest } from "@/lib/queryClient";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState(""); // We still ask for name, though Firebase doesn't use it by default
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
-    // This part stays the same - we'll update our backend's "me" route next
     const checkAuth = async () => {
       try {
         await apiRequest("GET", "/api/auth/me");
@@ -46,10 +44,8 @@ export default function AdminLogin() {
         throw new Error("Authentication failed, user not found.");
       }
 
-      // After successful Firebase login, get the token to send to our backend
       const token = await user.getIdToken();
 
-      // We still "log in" to our own backend by sending it the Firebase token
       await fetch('/api/auth/session-login', {
         method: 'POST',
         headers: {
@@ -76,7 +72,6 @@ export default function AdminLogin() {
   };
 
   return (
-    // The JSX for your form can remain exactly the same
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full mx-4">
         <Card className="bg-white rounded-xl shadow-lg border-t-4 border-red-600">
@@ -120,4 +115,66 @@ export default function AdminLogin() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.targe
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@example.com"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                  required
+                />
+              </div>
+              
+              <Button
+                type="submit"
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold"
+                disabled={loading}
+              >
+                {loading ? (
+                  "Processing..."
+                ) : isRegistering ? (
+                  <>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Create Account
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign In
+                  </>
+                )}
+              </Button>
+            </form>
+            
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(!isRegistering);
+                  setName("");
+                  setEmail("");
+                  setPassword("");
+                }}
+                className="text-red-600 hover:text-red-800 font-medium transition-colors"
+              >
+                {isRegistering ? "Already have an account? Sign in" : "Need an admin account? Register here"}
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
