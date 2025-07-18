@@ -1,3 +1,5 @@
+// The FINAL, CORRECTED code for client/src/pages/ArticleForm.tsx
+
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
@@ -7,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { onAuthStateChange } from "@/lib/auth";
+// *** FIX #1: Import auth object from firebase, and onAuthStateChanged directly from the firebase/auth library ***
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -35,7 +39,8 @@ export default function ArticleForm() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((user) => {
+    // *** FIX #2: Pass the imported `auth` object to onAuthStateChanged ***
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         setLocation("/admin");
       } else {
@@ -146,8 +151,6 @@ export default function ArticleForm() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // For now, we'll just use a placeholder URL
-      // In a real app, you would upload to Firebase Storage
       const mockImageUrl = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400";
       setImageUrl(mockImageUrl);
       
@@ -162,10 +165,7 @@ export default function ArticleForm() {
     if (!content) return;
     setIsGenerating(true);
     try {
-      const response = await apiRequest("/api/admin/ai/generate-title", {
-        method: "POST",
-        body: JSON.stringify({ content }),
-      });
+      const response = await apiRequest("POST", "/api/admin/ai/generate-title", { content });
       setTitle(response.title);
       toast({
         title: "Success",
@@ -186,10 +186,7 @@ export default function ArticleForm() {
     if (!content) return;
     setIsGenerating(true);
     try {
-      const response = await apiRequest("/api/admin/ai/generate-summary", {
-        method: "POST",
-        body: JSON.stringify({ content }),
-      });
+      const response = await apiRequest("POST", "/api/admin/ai/generate-summary", { content });
       setExcerpt(response.summary);
       toast({
         title: "Success",
