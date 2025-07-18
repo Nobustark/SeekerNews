@@ -21,7 +21,8 @@ export default function AdminLogin() {
     // Check if user is already authenticated
     const checkAuth = async () => {
       try {
-        await apiRequest("/api/auth/me");
+        // This GET request only needs the URL and method.
+        await apiRequest("GET", "/api/auth/me");
         setLocation("/admin/dashboard");
       } catch (error) {
         // User not authenticated, stay on login page
@@ -36,19 +37,17 @@ export default function AdminLogin() {
 
     try {
       if (isRegistering) {
-        await apiRequest("/api/auth/register", {
-          method: "POST",
-          body: JSON.stringify({ email, password, name }),
-        });
+        // *** THIS IS THE CORRECTED CODE ***
+        // Pass arguments as: method, url, data
+        await apiRequest("POST", "/api/auth/register", { email, password, name });
         toast({
           title: "Registration Successful",
           description: "Welcome! You can now access the admin dashboard.",
         });
       } else {
-        await apiRequest("/api/auth/login", {
-          method: "POST",
-          body: JSON.stringify({ email, password }),
-        });
+        // *** THIS IS THE CORRECTED CODE ***
+        // Pass arguments as: method, url, data
+        await apiRequest("POST", "/api/auth/login", { email, password });
         toast({
           title: "Login Successful",
           description: "Welcome back to the admin dashboard!",
