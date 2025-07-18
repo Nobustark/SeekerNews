@@ -1,4 +1,4 @@
-// The complete, corrected code for server/db.ts
+// The FINAL, COMPLETE, CORRECTED code for server/db.ts
 
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -11,8 +11,15 @@ if (!databaseUrl) {
   );
 }
 
+// Configure the pool to use SSL
 const pool = new Pool({
   connectionString: databaseUrl,
+  // *** THIS IS THE FIX ***
+  // Render's databases require SSL connections.
+  // rejectUnauthorized: false is needed because Render manages the CA certificates.
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 export const db = drizzle(pool, { schema, logger: true });
