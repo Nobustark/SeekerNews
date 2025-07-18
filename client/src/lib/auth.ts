@@ -1,29 +1,26 @@
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "./firebase";
+// The complete, corrected code for client/src/components/auth.ts
 
-export interface AuthState {
-  user: User | null;
-  loading: boolean;
-}
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged, 
+  type User 
+} from "firebase/auth";
+import { auth } from "./firebase"; // Your existing firebase.ts file
 
-export const loginWithEmail = async (email: string, password: string) => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return { user: userCredential.user, error: null };
-  } catch (error: any) {
-    return { user: null, error: error.message };
-  }
+export const registerWithFirebase = async (email: string, password: string) => {
+  return await createUserWithEmailAndPassword(auth, email, password);
 };
 
-export const logout = async () => {
-  try {
-    await signOut(auth);
-    return { error: null };
-  } catch (error: any) {
-    return { error: error.message };
-  }
+export const loginWithFirebase = async (email: string, password: string) => {
+  return await signInWithEmailAndPassword(auth, email, password);
 };
 
-export const onAuthStateChange = (callback: (user: User | null) => void) => {
+export const logoutFromFirebase = async () => {
+  return await signOut(auth);
+};
+
+export const onFirebaseAuthStateChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
