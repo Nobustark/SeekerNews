@@ -1,25 +1,12 @@
-// The FINAL, COMPLETE, CORRECTED code for server/db.ts
-
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+// The FINAL, CORRECTED NEON code for server/db.ts
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from "@shared/schema";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  throw new Error("DATABASE_URL must be set.");
 }
 
-// Configure the pool to use SSL
-const pool = new Pool({
-  connectionString: databaseUrl,
-  // *** THIS IS THE FIX ***
-  // Render's databases require SSL connections.
-  // rejectUnauthorized: false is needed because Render manages the CA certificates.
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
-
-export const db = drizzle(pool, { schema, logger: true });
+const sql = neon(databaseUrl);
+export const db = drizzle(sql, { schema, logger: true });
