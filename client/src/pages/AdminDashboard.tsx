@@ -29,7 +29,7 @@ export default function AdminDashboard() {
       }
     };
     checkAuth();
-  }, [setLocation]);
+  }, []);
 
   const { data: articles, isLoading: articlesLoading } = useQuery<Article[]>({
     queryKey: ["/api/admin/articles"],
