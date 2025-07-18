@@ -1,4 +1,4 @@
-// THE NEW, COMPLETE, FIREBASE-POWERED server/routes.ts
+// THE TRULY COMPLETE AND CORRECTED server/routes.ts
 
 import type { Express } from "express";
 import { createServer, type Server } from "http";
@@ -7,7 +7,6 @@ import { insertArticleSchema, updateArticleSchema } from "@shared/schema";
 import { generateSummary, generateTitle, generateTags } from "./gemini";
 import cookieParser from "cookie-parser";
 import jwt from 'jsonwebtoken';
-// Import our new Firebase Admin SDK
 import { firebaseAdmin } from './firebase-admin';
 
 const SESSION_SECRET = process.env.SESSION_SECRET || 'a-fallback-secret-for-local-dev';
@@ -20,11 +19,9 @@ if (!ADMIN_EMAIL) {
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
 
-  // === NEW FIREBASE AUTH MIDDLEWARE ===
   const requireAuth = async (req: any, res: any, next: any) => {
     const sessionCookie = req.cookies.session || '';
     try {
-      // Use our own JWT cookie to manage the session
       const decodedClaims = jwt.verify(sessionCookie, SESSION_SECRET) as any;
       if (decodedClaims.email !== ADMIN_EMAIL) {
         return res.status(403).json({ message: "Forbidden: Not an admin" });
@@ -36,62 +33,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
-  // === NEW SESSION LOGIN ENDPOINT ===
   app.post('/api/auth/session-login', async (req, res) => {
     const authHeader = req.headers.authorization || '';
     const idToken = authHeader.split('Bearer ')[1];
-
-    if (!idToken) {
-      return res.status(401).send('No Firebase token provided');
-    }
-
+    if (!idToken) return res.status(401).send('No Firebase token provided');
     try {
-      // Let Firebase verify the token is valid
       const decodedFirebaseToken = await firebaseAdmin.auth().verifyIdToken(idToken);
-      const userEmail = decodedFirebaseToken.email;
-
-      // Check if the verified user is THE admin
-      if (userEmail !== ADMIN_EMAIL) {
+      if (decodedFirebaseToken.email !== ADMIN_EMAIL) {
         return res.status(403).json({ message: 'Forbidden: You are not the designated admin.' });
       }
-
-      // If they are the admin, create our own session JWT
-      const sessionPayload = {
-        uid: decodedFirebaseToken.uid,
-        email: userEmail,
-      };
+      const sessionPayload = { uid: decodedFirebaseToken.uid, email: decodedFirebaseToken.email };
       const sessionToken = jwt.sign(sessionPayload, SESSION_SECRET, { expiresIn: '7d' });
-
-      // Send the session token back in a secure, httpOnly cookie
-      res.cookie('session', sessionToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        path: '/',
-      });
-
+      res.cookie('session', sessionToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 7 * 24 * 60 * 60 * 1000, path: '/' });
       res.status(200).json({ status: 'success' });
     } catch (error) {
-      console.error('Session login error:', error);
       res.status(401).json({ message: 'Invalid Firebase token' });
     }
   });
 
-  // Logout clears the session cookie
   app.post("/api/auth/logout", (req, res) => {
     res.clearCookie('session');
     res.json({ message: "Logout successful" });
   });
 
-  // "Me" endpoint now verifies our own session cookie
   app.get("/api/auth/me", requireAuth, (req: any, res) => {
     res.json(req.user);
   });
 
-  // --- ALL YOUR OTHER ADMIN & PUBLIC ROUTES STAY THE SAME ---
-  // They are now protected by the new Firebase-powered requireAuth middleware
-
-  // Get all published articles for public homepage
+  // --- PUBLIC ARTICLE ROUTES ---
   app.get("/api/articles", async (req, res) => {
     try {
       const articles = await storage.getPublishedArticles();
@@ -101,23 +70,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single article by slug
   app.get("/api/articles/:slug", async (req, res) => {
     try {
-      const { slug } = req.params;
-      const article = await storage.getArticleBySlug(slug);
-      
+      const article = await storage.getArticleBySlug(req.params.slug);
       if (!article || !article.published) {
         return res.status(404).json({ message: "Article not found" });
       }
-      
       res.json(article);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch article" });
     }
   });
 
-  // Admin routes - Get all articles (including unpublished)
+  // --- ADMIN ARTICLE ROUTES ---
   app.get("/api/admin/articles", requireAuth, async (req, res) => {
     try {
       const articles = await storage.getArticles();
@@ -127,7 +92,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ... All other POST, PUT, DELETE routes for articles and AI helpers remain the same ...
+  app.get("/api/admin/articles/:id", requireAuth, async (req, res) => {
+    try {
+      const article = await storage.getArticleById(parseInt(req.params.id));
+      if (!article) return res.status(404).json({ message: "Article not found" });
+      res.json(article);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch article" });
+    }
+  });
+
+  // *** THIS IS THE MISSING ROUTE TO CREATE ARTICLES ***
+  app.post("/api/admin/articles", requireAuth, async (req, res) => {
+    try {
+      const result = insertArticleSchema.safeParse(req.body);
+      if (!result.success) return res.status(400).json(result.error);
+      const article = await storage.createArticle(result.data);
+      res.status(201).json(article);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create article" });
+    }
+  });
+
+  // *** THIS IS THE MISSING ROUTE TO UPDATE ARTICLES ***
+  app.put("/api/admin/articles/:id", requireAuth, async (req, res) => {
+    try {
+      const result = updateArticleSchema.safeParse(req.body);
+      if (!result.success) return res.status(400).json(result.error);
+      const article = await storage.updateArticle(parseInt(req.params.id), result.data);
+      if (!article) return res.status(404).json({ message: "Article not found" });
+      res.json(article);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update article" });
+    }
+  });
+  
+  // *** THIS IS THE MISSING ROUTE TO DELETE ARTICLES ***
+  app.delete("/api/admin/articles/:id", requireAuth, async (req, res) => {
+    try {
+      const success = await storage.deleteArticle(parseInt(req.params.id));
+      if (!success) return res.status(404).json({ message: "Article not found" });
+      res.json({ message: "Article deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete article" });
+    }
+  });
+
+  // *** THESE ARE THE MISSING AI HELPER ROUTES ***
+  app.post("/api/admin/ai/generate-summary", requireAuth, async (req, res) => {
+    try {
+      const summary = await generateSummary(req.body.content);
+      res.json({ summary });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate summary" });
+    }
+  });
+
+  app.post("/api/admin/ai/generate-title", requireAuth, async (req, res) => {
+    try {
+      const title = await generateTitle(req.body.content);
+      res.json({ title });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate title" });
+    }
+  });
+
+  app.post("/api/admin/ai/generate-tags", requireAuth, async (req, res) => {
+    try {
+      const tags = await generateTags(req.body.content);
+      res.json({ tags });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate tags" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
