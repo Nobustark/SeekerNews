@@ -212,11 +212,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Admin already exists with this email" });
       }
 
-      const hashedPassword = await hashPassword(result.data.password);
       const admin = await storage.createAdmin({
-        ...result.data,
-        password: hashedPassword,
-      });
+  ...result.data,
+  // Pass the plain password directly. The createAdmin function will handle hashing.
+  password: result.data.password, 
+});
 
       const token = generateToken(admin.id);
       res.cookie('authToken', token, { 
