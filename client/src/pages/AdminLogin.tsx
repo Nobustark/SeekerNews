@@ -8,9 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, UserPlus, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { registerWithFirebase, loginWithFirebase } from "@/components/auth"; // We only need these now
 import { apiRequest } from "@/lib/queryClient";
-
+import { registerWithFirebase, loginWithFirebase } from "@/components/auth.ts";
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
