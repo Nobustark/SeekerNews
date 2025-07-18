@@ -227,6 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Registration successful"
       });
     } catch (error) {
+      console.error("REGISTRATION ERROR:", error);
       res.status(500).json({ message: "Registration failed" });
     }
   });
