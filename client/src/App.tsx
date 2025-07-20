@@ -1,3 +1,5 @@
+// THE FINAL, COMPLETE, CORRECTED code for client/src/App.tsx
+
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -17,6 +19,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      {/* *** FIX #1: THIS IS THE CORRECTED ROUTE FOR VIEWING ARTICLES *** */}
       <Route path="/articles/:slug" component={ArticlePage} />
       <Route path="/category/:category" component={CategoryPage} />
       <Route path="/about" component={AboutPage} />
@@ -24,7 +27,8 @@ function Router() {
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/articles/new" component={ArticleForm} />
-      <Route path="/admin/articles/:id" component={ArticleForm} />
+      {/* *** FIX #2: THIS IS THE MISSING ROUTE FOR EDITING ARTICLES *** */}
+      <Route path="/admin/articles/:id/edit" component={ArticleForm} />
       <Route component={NotFound} />
     </Switch>
   );
