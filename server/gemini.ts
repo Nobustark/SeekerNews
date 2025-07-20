@@ -39,7 +39,7 @@ export async function generateTitle(content: string): Promise<string> {
   try {
     const ai = getClient();
     const model = ai.getGenerativeModel({ model: "gemini-1.5-flash"});
-    const prompt = `Based on this article content, suggest a compelling news headline (max 80 characters):\n\n${content.substring(0, 1000)}`;
+    const prompt = `Based on this article content, give me a compelling news headline, just give me the title only with no added extra text (max 80 characters):\n\n${content.substring(0, 1000)}`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
