@@ -27,7 +27,7 @@ function Router() {
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/articles/new" component={ArticleForm} />
-      {/* *** FIX #2: THIS IS THE MISSING ROUTE FOR EDITING ARTICLES *** */}
+      {/* *** FIX #2: THIS IS THE CORRECTED ROUTE FOR EDITING ARTICLES *** */}
       <Route path="/admin/articles/:id/edit" component={ArticleForm} />
       <Route component={NotFound} />
     </Switch>
