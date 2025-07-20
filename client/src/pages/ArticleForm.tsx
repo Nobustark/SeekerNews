@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// *** THIS IS THE FIX: The route pattern now matches App.tsx ***
 import { useRoute, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,21 +16,18 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import { X, CloudUpload, Trash2, Send, Sparkles, Brain } from "lucide-react";
 import type { Article } from "@shared/schema";
 
-export default function ArticleForm() {
-  // *** THIS IS THE FIX: The route pattern now matches App.tsx for editing ***
+// *** THIS IS THE FIX: We define the component first... ***
+const ArticleForm = () => {
   const [isEditMatch, params] = useRoute("/admin/articles/:id/edit");
-  const [isNewMatch] = useRoute("/admin/articles/new");
   const isEdit = isEditMatch && params?.id !== undefined;
   const articleId = isEdit ? parseInt(params!.id) : null;
-  
+
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // (The rest of the file is identical to the last correct version)
-  // ... all other state and functions remain the same ...
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [content, setContent] = useState("");
@@ -129,7 +125,6 @@ export default function ArticleForm() {
     try {
       const response = await apiRequest("POST", endpoint, { content });
       const data = await response.json();
-      
       if (feature === 'title') {
         setTitle(data.title);
       } else {
@@ -145,8 +140,7 @@ export default function ArticleForm() {
 
   if (loading || (isEdit && articleLoading)) return <LoadingSpinner size="lg" className="py-16" />;
   if (!user) return null;
-  
-  // The entire JSX block is the same as the last correct version
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm border-b">
@@ -166,15 +160,63 @@ export default function ArticleForm() {
         </div>
       </div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Card className="bg-white rounded-xl shadow-lg">
-              <CardContent className="p-8">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                      {/* ... All your form JSX from the last good version goes here ... */}
-                  </form>
-              </CardContent>
-          </Card>
+        <Card className="bg-white rounded-xl shadow-lg">
+          <CardContent className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* All the form JSX... */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="title" className="text-sm font-semibold text-gray-700">Article Title *</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAiFeature('title')} disabled={!content || isGenerating} className="text-red-600 border-red-600 hover:bg-red-50"><Brain className="w-4 h-4 mr-1" />{isGenerating ? "Generating..." : "AI Title"}</Button>
+                  </div>
+                  <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter article title" className="w-full" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug" className="text-sm font-semibold text-gray-700">URL Slug</Label>
+                  <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Auto-generated from title" className="w-full bg-gray-50" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="image" className="text-sm font-semibold text-gray-700">Article Image</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-500 transition-colors">
+                  <input type="file" id="image" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  {imageUrl ? (
+                    <div className="space-y-4">
+                      <img src={imageUrl} alt="Article preview" className="max-w-full h-48 object-cover rounded-lg mx-auto" />
+                      <Button type="button" variant="outline" onClick={() => setImageUrl("")} className="text-red-600 hover:text-red-800"><Trash2 className="w-4 h-4 mr-2" />Remove Image</Button>
+                    </div>
+                  ) : (
+                    <div className="cursor-pointer" onClick={() => document.getElementById('image')?.click()}><CloudUpload className="w-12 h-12 text-gray-400 mb-4 mx-auto" /><p className="text-gray-600 mb-2">Click to upload image or drag and drop</p><p className="text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p></div>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="excerpt" className="text-sm font-semibold text-gray-700">Article Excerpt</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={() => handleAiFeature('summary')} disabled={!content || isGenerating} className="text-red-600 border-red-600 hover:bg-red-50"><Sparkles className="w-4 h-4 mr-1" />{isGenerating ? "Generating..." : "AI Summary"}</Button>
+                </div>
+                <Textarea id="excerpt" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="Brief summary of the article (optional)" rows={3} className="w-full" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="content" className="text-sm font-semibold text-gray-700">Article Content *</Label>
+                <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} placeholder="Write your article content here..." rows={15} className="w-full" required />
+              </div>
+              <div className="flex items-center space-x-2">
+                <input type="checkbox" id="published" checked={published} onChange={(e) => setPublished(e.target.checked)} className="rounded border-gray-300" />
+                <Label htmlFor="published" className="text-sm text-gray-700">Publish article immediately</Label>
+              </div>
+              <div className="flex items-center justify-between pt-6">
+                <Button type="button" variant="outline" onClick={() => setLocation("/admin/dashboard")}>Cancel</Button>
+                <Button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-semibold" disabled={createArticleMutation.isPending || updateArticleMutation.isPending}>{createArticleMutation.isPending || updateArticleMutation.isPending ? ("Saving...") : (<><Send className="w-4 h-4 mr-2" />{isEdit ? "Update Article" : "Publish Article"}</>)}</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 };
+
+// ...and then we export it ONCE at the end.
 export default ArticleForm;
