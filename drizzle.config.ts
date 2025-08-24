@@ -1,9 +1,8 @@
-// The FINAL, CORRECT code for drizzle.config.ts
-
+// Final correct drizzle.config.ts for Neon
 import { defineConfig } from "drizzle-kit";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL must be set");
+  throw new Error("DATABASE_URL must be set.");
 }
 
 export default defineConfig({
@@ -12,5 +11,6 @@ export default defineConfig({
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL,
+    ssl: true, // Ensure SSL is forced for the migration tool
   },
 });
