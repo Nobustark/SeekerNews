@@ -99,7 +99,15 @@ const ArticleForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !content) return;
-    const articleData = { title, slug, content, excerpt, imageUrl, published, author: user?.email || "Admin" };
+
+    let finalSlug = slug;
+    // If we are CREATING a new article, append a timestamp to the slug to ensure uniqueness
+    if (!isEdit) {
+      finalSlug = `${slug}-${Date.now()}`;
+    }
+
+    const articleData = { title, slug: finalSlug, content, excerpt, imageUrl, published, author: user?.email || "Admin" };
+
     if (isEdit) {
       updateArticleMutation.mutate(articleData);
     } else {
