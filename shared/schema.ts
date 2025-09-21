@@ -36,7 +36,7 @@ export const articles = pgTable("articles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-xport const insertArticleSchema = createInsertSchema(articles, {
+export const insertArticleSchema = createInsertSchema(articles, {
   // Make certain fields required on creation
   title: z.string().min(1, "Title is required"),
   content: z.string().min(1, "Content is required"),
