@@ -60,14 +60,14 @@ function UserManagement() {
       </CardContent>
     </Card>
   );
-}
 
 // This is the existing component for the articles table
-// This is the existing component for the articles table
 function ArticleManagement() {
-  const { data: articles, isLoading } = useQuery<Article[]>({ 
-    queryKey: ["/api/admin/articles"] 
+  const { data: articles, isLoading } = useQuery<Article[]>({
+    queryKey: ["admin-articles-list"], // Using a descriptive string key
+    queryFn: () => apiRequest("GET", "/api/admin/articles").then(res => res.json()),
   });
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -75,7 +75,7 @@ function ArticleManagement() {
   const deleteArticleMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/articles/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/articles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-articles-list"] });
       toast({ title: "Article Deleted", description: "The article has been successfully removed." });
     },
     onError: () => {
