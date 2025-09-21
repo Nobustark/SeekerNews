@@ -1,7 +1,8 @@
 // THE NEW, UPGRADED code for shared/schema.ts
+export const categories = ["Breaking", "World", "Tech", "Business", "Sports", "Health", "Entertainment"] as const;
 
 import { pgTable, text, varchar, serial, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Define the roles a user can have
@@ -24,29 +25,39 @@ export const articles = pgTable("articles", {
   content: text("content").notNull(),
   excerpt: text("excerpt"),
   imageUrl: text("image_url"),
-  author: text("author").default("Admin"),
-  published: boolean("published").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-  // We can optionally link articles to a user in the future
-  // authorId: varchar("author_id", { length: 255 }).references(() => users.firebaseUid),
+  
+  // --- MODIFIED/NEW LINES START HERE ---
+  author: text("author").notNull().default("TheSeeker Staff"),
+  category: text("category", { enum: categories }).notNull().default("Breaking"),
+  // --- MODIFIED/NEW LINES END HERE ---
+
+  published: boolean("published").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertArticleSchema = createInsertSchema(articles).omit({
+xport const insertArticleSchema = createInsertSchema(articles, {
+  // Make certain fields required on creation
+  title: z.string().min(1, "Title is required"),
+  content: z.string().min(1, "Content is required"),
+}).omit({
+  // Omit fields that are auto-generated
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const updateArticleSchema = insertArticleSchema.partial();
-
-export type InsertArticle = z.infer<typeof insertArticleSchema>;
-export type UpdateArticle = z.infer<typeof updateArticleSchema>;
-export type Article = typeof articles.$inferSelect;
-
-// New User types
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export const updateArticleSchema = createSelectSchema(articles).pick({
+  // Define which fields can be updated
+  title: true,
+  slug: true,
+  content: true,
+  excerpt: true,
+  imageUrl: true,
+  author: true,
+  category: true, // <-- ADD THIS LINE
+  published: true,
+});
 
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
