@@ -103,9 +103,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // --- PUBLIC ARTICLE ROUTES (No changes needed) ---
-  // ...
+ // --- PUBLIC ARTICLE ROUTES ---
+  // Fetches all articles that are marked as 'published'
+  app.get("/api/articles", async (req, res) => {
+    try {
+      const articles = await storage.getPublishedArticles();
+      res.json(articles);
+    } catch (error) {
+      console.error("Failed to fetch published articles:", error);
+      res.status(500).json({ message: "Failed to fetch articles." });
+    }
+  });
 
+  // Fetches a single published article by its unique slug
+  app.get("/api/articles/:slug", async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      const article = await storage.getArticleBySlug(slug);
+
+      if (!article || !article.published) {
+        // If article doesn't exist or isn't published, return 404
+        return res.status(404).json({ message: "Article not found." });
+      }
+
+      res.json(article);
+    } catch (error) {
+      console.error(`Failed to fetch article with slug ${req.params.slug}:`, error);
+      res.status(500).json({ message: "Failed to fetch the article." });
+    }
+  });
   // --- PROTECTED ARTICLE ROUTES ---
   // The middleware now checks for 'author' or 'admin' roles
   const canPost = requireAuth(['author', 'admin']);
