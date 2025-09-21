@@ -112,7 +112,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/articles", canPost, async (req, res) => { /* ... */ });
   app.get("/api/admin/articles/:id", canPost, async (req, res) => { /* ... */ });
-  app.post("/api/admin/articles", canPost, async (req, res) => { /* ... */ });
+  app.post("/api/admin/articles", canPost, async (req, res) => {
+    try {
+      // 1. Validate the request body against our shared schema
+      const newArticleData = insertArticleSchema.parse(req.body);
+
+      // 2. Pass the validated data to the storage layer to create the article
+      const createdArticle = await storage.createArticle(newArticleData);
+
+      // 3. Send a "201 Created" status and the new article back to the client
+      res.status(201).json(createdArticle);
+
+    } catch (error) {
+      // If validation fails or the database has an error, catch it
+      console.error("Failed to create article:", error);
+
+      // 4. Send an error response
+      res.status(500).json({ message: "Failed to create the article." });
+    }
+  });
   app.put("/api/admin/articles/:id", canPost, async (req, res) => { /* ... */ });
   app.delete("/api/admin/articles/:id", canPost, async (req, res) => { /* ... */ });
 
