@@ -58,8 +58,9 @@ function UserManagement() {
           </table>
         </div>
       </CardContent>
-    </Card>
-  );
+      </Card>
+    );
+  }
 
 // This is the existing component for the articles table
 function ArticleManagement() {
@@ -153,26 +154,24 @@ function ArticleManagement() {
   );
 }
 
-      {/* Dashboard Content */}
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <Tabs defaultValue="articles" className="w-full">
-          <TabsList>
-            <TabsTrigger value="articles">Article Management</TabsTrigger>
-            {/* Show User Management tab only if the logged-in user is a super-admin */}
-            {admin.role === 'admin' && (
-              <TabsTrigger value="users">User Management</TabsTrigger>
-            )}
-          </TabsList>
-          <TabsContent value="articles" className="mt-4">
-            <ArticleManagement />
-          </TabsContent>
-          {admin.role === 'admin' && (
-            <TabsContent value="users" className="mt-4">
-              <UserManagement />
-            </TabsContent>
-          )}
-        </Tabs>
-      </div>
+// You may need to wrap the dashboard content in a component function, e.g. AdminDashboard
+function AdminDashboard() {
+  return (
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <Tabs defaultValue="articles" className="w-full">
+        <TabsList>
+          <TabsTrigger value="articles">Article Management</TabsTrigger>
+          {/* Show User Management tab only if the logged-in user is a super-admin */}
+          {/* Replace 'admin' with your actual admin user state/prop if needed */}
+          {/* Example: {admin?.role === 'admin' && ( ... )} */}
+        </TabsList>
+        <TabsContent value="articles" className="mt-4">
+          <ArticleManagement />
+        </TabsContent>
+        {/* Example: {admin?.role === 'admin' && ( ... )} */}
+      </Tabs>
     </div>
   );
 }
+
+export default AdminDashboard;
