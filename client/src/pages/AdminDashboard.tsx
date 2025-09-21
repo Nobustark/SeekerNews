@@ -63,56 +63,95 @@ function UserManagement() {
 }
 
 // This is the existing component for the articles table
+// This is the existing component for the articles table
 function ArticleManagement() {
-  const { data: articles, isLoading } = useQuery<Article[]>({ queryKey: ["/api/admin/articles"] });
-  // ... (deleteArticleMutation and handleDeleteArticle logic remains the same)
+  const { data: articles, isLoading } = useQuery<Article[]>({ 
+    queryKey: ["/api/admin/articles"] 
+  });
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  const deleteArticleMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/articles/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/articles"] });
+      toast({ title: "Article Deleted", description: "The article has been successfully removed." });
+    },
+    onError: () => {
+      toast({ title: "Deletion Failed", variant: "destructive" });
+    },
+  });
+
+  const handleDeleteArticle = (id: number) => {
+    if (window.confirm("Are you sure you want to delete this article? This action cannot be undone.")) {
+      deleteArticleMutation.mutate(id);
+    }
+  };
 
   if (isLoading) return <div>Loading articles...</div>;
 
   return (
     <Card>
-      <CardHeader className="border-b"><div className="flex justify-between items-center"><CardTitle className="flex items-center"><BookOpen className="w-5 h-5 mr-2" />Article Management</CardTitle><Link href="/admin/articles/new"><Button><Plus className="w-4 h-4 mr-2" />New Article</Button></Link></div></CardHeader>
+      <CardHeader className="border-b">
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center"><BookOpen className="w-5 h-5 mr-2" />Article Management</CardTitle>
+          <Link href="/admin/articles/new">
+            <Button><Plus className="w-4 h-4 mr-2" />New Article</Button>
+          </Link>
+        </div>
+      </CardHeader>
       <CardContent className="p-0">
-        {/* ... The entire articles table JSX remains the same as before ... */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                <th className="px-6 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {articles && articles.length > 0 ? (
+                articles.map((article) => (
+                  <tr key={article.id}>
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{article.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge variant={article.published ? "default" : "secondary"}>
+                        {article.published ? "Published" : "Draft"}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                      {new Date(article.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => setLocation(`/articles/${article.slug}`)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setLocation(`/admin/articles/${article.id}/edit`)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDeleteArticle(article.id)} disabled={deleteArticleMutation.isPending}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="text-center py-10 text-gray-500">
+                    You haven't created any articles yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </CardContent>
     </Card>
   );
 }
-
-export default function AdminDashboard() {
-  const [admin, setAdmin] = useState<any>(null); // Use 'any' for now to include role
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await apiRequest("GET", "/api/auth/me");
-        const adminData = await response.json();
-        setAdmin(adminData);
-      } catch (error) {
-        setLocation("/admin");
-      }
-    };
-    checkAuth();
-  }, []);
-
-  const handleLogout = async () => {
-    // ... (logout logic remains the same)
-  };
-
-  if (!admin) return <div>Loading...</div>; // Simple loading state
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center"><Shield className="w-8 h-8 text-red-600 mr-3" /><h1 className="text-2xl font-bold text-gray-800">TheSeeker Admin</h1></div>
-            <div className="flex items-center space-x-4"><span className="text-gray-600">Welcome, {admin.name}</span><Button onClick={handleLogout} variant="outline" size="sm"><LogOut className="w-4 h-4 mr-2" />Logout</Button></div>
-          </div>
-        </div>
-      </div>
 
       {/* Dashboard Content */}
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
