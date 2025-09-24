@@ -1,5 +1,5 @@
 // THE NEW, UPGRADED code for shared/schema.ts
-export const categories = ["Breaking", "World", "Tech", "Business", "Sports", "Health", "Entertainment"] as const;
+export const categories = ["Breaking", "Editorial", "India", "World", "Tech", "Business", "Sports", "Health", "Entertainment", "Politics", "Film Review"] as const;
 
 import { pgTable, text, varchar, serial, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
