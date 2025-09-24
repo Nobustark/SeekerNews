@@ -1,21 +1,38 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Shield, Search, Menu, Bell, User, Flame, Globe, TrendingUp, Briefcase, Heart, Zap, Play } from "lucide-react";
+import { Shield, Search, Menu, Bell, User, Flame, Globe, Zap, Briefcase, TrendingUp, Heart, Play, Atom, Landmark } from "lucide-react";
 import { useState } from "react";
+import { categories as importedCategories } from "@shared/schema"; // Import the source of truth
+
+// Helper object to map category names to icons and colors
+const categoryStyles: { [key: string]: { icon: React.ElementType; color: string } } = {
+  Breaking: { icon: Flame, color: "text-red-600" },
+  World: { icon: Globe, color: "text-blue-600" },
+  Tech: { icon: Zap, color: "text-purple-600" },
+  Business: { icon: Briefcase, color: "text-green-600" },
+  Sports: { icon: TrendingUp, color: "text-orange-600" },
+  Health: { icon: Heart, color: "text-pink-600" },
+  Entertainment: { icon: Play, color: "text-indigo-600" },
+  // Add new categories here to give them an icon
+  Science: { icon: Atom, color: "text-teal-600" },
+  Politics: { icon: Landmark, color: "text-gray-700" },
+  // A default for any categories not listed above
+  Default: { icon: Flame, color: "text-gray-500" },
+};
 
 export default function Navigation() {
   const [location] = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const categories = [
-    { name: "Breaking", icon: Flame, color: "text-red-600", href: "/category/breaking" },
-    { name: "World", icon: Globe, color: "text-blue-600", href: "/category/world" },
-    { name: "Tech", icon: Zap, color: "text-purple-600", href: "/category/tech" },
-    { name: "Business", icon: Briefcase, color: "text-green-600", href: "/category/business" },
-    { name: "Sports", icon: TrendingUp, color: "text-orange-600", href: "/category/sports" },
-    { name: "Health", icon: Heart, color: "text-pink-600", href: "/category/health" },
-    { name: "Entertainment", icon: Play, color: "text-indigo-600", href: "/category/entertainment" },
-  ];
+  
+  // Now we create the menu items dynamically
+  const categoryMenuItems = importedCategories.map(name => {
+    const style = categoryStyles[name] || categoryStyles.Default;
+    return {
+      name,
+      ...style,
+      href: `/category/${name.toLowerCase()}`
+    };
+  });
 
   return (
     <>
@@ -92,12 +109,12 @@ export default function Navigation() {
           </div>
         </div>
 
-        {/* Categories Menu */}
+        {/* Categories Menu (NOW DYNAMIC) */}
         <div className="bg-gray-50 border-t border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between py-3">
               <div className="flex items-center space-x-6 overflow-x-auto">
-                {categories.map((category) => {
+                {categoryMenuItems.map((category) => {
                   const Icon = category.icon;
                   return (
                     <Link key={category.name} href={category.href}>
@@ -119,7 +136,7 @@ export default function Navigation() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu (NOW DYNAMIC) */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-200">
             <div className="px-4 py-4 space-y-4">
@@ -129,7 +146,7 @@ export default function Navigation() {
                 </div>
               </Link>
               <div className="space-y-2">
-                {categories.map((category) => {
+                {categoryMenuItems.map((category) => {
                   const Icon = category.icon;
                   return (
                     <Link key={category.name} href={category.href}>
